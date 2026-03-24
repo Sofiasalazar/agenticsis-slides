@@ -1,0 +1,6 @@
+export { HeroSlide } from './HeroSlide'
+export { BulletsSlide } from './BulletsSlide'
+export { SplitSlide } from './SplitSlide'
+export { QuoteSlide } from './QuoteSlide'
+export { StatSlide } from './StatSlide'
+export { CtaSlide } from './CtaSlide'
