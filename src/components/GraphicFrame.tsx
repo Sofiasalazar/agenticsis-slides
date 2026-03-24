@@ -191,27 +191,38 @@ export function GraphicFrame({ graphic, onGenerate, onUpload, onClear, onSkip, o
       {hasContent && !graphic.loading && !editingPrompt && (
         <div style={{
           position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10,
-          display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '1px',
-          padding: '6px 8px',
-          background: 'linear-gradient(to top, rgba(10,10,10,0.85) 0%, transparent 100%)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px',
+          padding: '8px 10px',
+          background: 'linear-gradient(to top, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.6) 70%, transparent 100%)',
         }}>
-          <button onClick={() => { setPromptDraft(graphic.prompt); setEditingPrompt(true) }}
-            title="Regenerate with new prompt"
-            style={{ padding: '4px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 600, background: 'rgba(15,15,15,0.8)', border: '1px solid #1a1a1a', color: '#525252', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s', backdropFilter: 'blur(4px)' }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#F5F5F5'; e.currentTarget.style.borderColor = '#262626' }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#525252'; e.currentTarget.style.borderColor = '#1a1a1a' }}>
-            Regenerate
-          </button>
-          <button onClick={handleUploadClick} title="Upload your own image"
-            style={{ padding: '4px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 600, background: 'rgba(15,15,15,0.8)', border: '1px solid #1a1a1a', color: '#525252', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s', backdropFilter: 'blur(4px)' }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#F5F5F5'; e.currentTarget.style.borderColor = '#262626' }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#525252'; e.currentTarget.style.borderColor = '#1a1a1a' }}>
-            Upload
-          </button>
+          <div style={{ display: 'flex', gap: '4px' }}>
+            {/* Regenerate immediately with same prompt */}
+            <button onClick={() => onGenerate(graphic.prompt)}
+              title="Regenerate with same prompt"
+              style={{ padding: '5px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, background: 'linear-gradient(135deg, rgba(139,92,246,0.25), rgba(147,51,234,0.25))', border: '1px solid rgba(139,92,246,0.35)', color: '#c4b5fd', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(139,92,246,0.45), rgba(147,51,234,0.45))'; e.currentTarget.style.color = '#F5F5F5' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(139,92,246,0.25), rgba(147,51,234,0.25))'; e.currentTarget.style.color = '#c4b5fd' }}>
+              ↺ Regenerate
+            </button>
+            {/* Edit prompt then regenerate */}
+            <button onClick={() => { setPromptDraft(graphic.prompt); setEditingPrompt(true) }}
+              title="Edit prompt and regenerate"
+              style={{ padding: '5px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 600, background: 'rgba(15,15,15,0.8)', border: '1px solid #262626', color: '#737373', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s', backdropFilter: 'blur(4px)' }}
+              onMouseEnter={e => { e.currentTarget.style.color = '#F5F5F5'; e.currentTarget.style.borderColor = '#404040' }}
+              onMouseLeave={e => { e.currentTarget.style.color = '#737373'; e.currentTarget.style.borderColor = '#262626' }}>
+              Edit
+            </button>
+            <button onClick={handleUploadClick} title="Upload your own image"
+              style={{ padding: '5px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 600, background: 'rgba(15,15,15,0.8)', border: '1px solid #262626', color: '#737373', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s', backdropFilter: 'blur(4px)' }}
+              onMouseEnter={e => { e.currentTarget.style.color = '#F5F5F5'; e.currentTarget.style.borderColor = '#404040' }}
+              onMouseLeave={e => { e.currentTarget.style.color = '#737373'; e.currentTarget.style.borderColor = '#262626' }}>
+              Upload
+            </button>
+          </div>
           <button onClick={onClear} title="Remove graphic"
-            style={{ padding: '4px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 600, background: 'rgba(15,15,15,0.8)', border: '1px solid #1a1a1a', color: '#3a3a3a', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s', backdropFilter: 'blur(4px)' }}
+            style={{ padding: '5px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 600, background: 'rgba(15,15,15,0.8)', border: '1px solid #262626', color: '#525252', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s', backdropFilter: 'blur(4px)' }}
             onMouseEnter={e => { e.currentTarget.style.color = '#fca5a5'; e.currentTarget.style.borderColor = 'rgba(239,68,68,0.3)' }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#3a3a3a'; e.currentTarget.style.borderColor = '#1a1a1a' }}>
+            onMouseLeave={e => { e.currentTarget.style.color = '#525252'; e.currentTarget.style.borderColor = '#262626' }}>
             ✕ Remove
           </button>
         </div>

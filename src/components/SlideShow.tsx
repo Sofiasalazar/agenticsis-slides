@@ -53,10 +53,11 @@ export function SlideShow({
     if (format === 'pdf') { window.print(); return }
     setExporting(true)
     try {
-      await new Promise(r => setTimeout(r, 2000))
+      // Brief pause for any lazy renders, then export.ts waits for animations per-element
+      await new Promise(r => setTimeout(r, 500))
       const elements = exportRefs.current.filter(Boolean) as HTMLElement[]
-      if (format === 'png') await exportPNG(elements, presentation.title)
-      if (format === 'pptx') await exportPPTX(elements, presentation.title)
+      if (format === 'png') await exportPNG(elements, presentation.title, colors.bg)
+      if (format === 'pptx') await exportPPTX(elements, presentation.title, colors.bg)
     } finally {
       setExporting(false)
     }
@@ -274,7 +275,7 @@ export function SlideShow({
       </div>
 
       {/* Hidden export container */}
-      <div aria-hidden className="is-exporting" style={{ position: 'fixed', left: '-9999px', top: 0, zIndex: -1, pointerEvents: 'none', ...cssVars }}>
+      <div aria-hidden style={{ position: 'fixed', left: '-9999px', top: 0, zIndex: -1, pointerEvents: 'none', ...cssVars }}>
         {presentation.slides.map((slide, i) => (
           <div
             key={i}
@@ -360,7 +361,7 @@ export function SlideShow({
           }} />
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           <p style={{ fontSize: '14px', fontWeight: 600, color: '#F5F5F5' }}>Exporting slides...</p>
-          <p style={{ fontSize: '12px', color: '#525252' }}>This may take a moment</p>
+          <p style={{ fontSize: '12px', color: '#525252' }}>Waiting for all graphics to finish rendering</p>
         </div>
       )}
     </div>

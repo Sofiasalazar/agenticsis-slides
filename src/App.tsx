@@ -20,6 +20,7 @@ const SESSION_KEY = 'agenticsis_slides_session'
 
 interface SavedSession {
   presentation: Presentation
+  graphics: Record<number, GraphicState>
   savedAt: string
   slideCount: number
 }
@@ -31,15 +32,29 @@ function loadSession(): SavedSession | null {
   } catch { return null }
 }
 
-function saveSession(presentation: Presentation, slideCount: number) {
+function saveSession(
+  presentation: Presentation,
+  graphics: Record<number, GraphicState>,
+  slideCount: number
+) {
+  const session: SavedSession = {
+    presentation,
+    graphics,
+    slideCount,
+    savedAt: new Date().toISOString(),
+  }
   try {
-    const session: SavedSession = {
-      presentation,
-      slideCount,
-      savedAt: new Date().toISOString(),
-    }
     localStorage.setItem(SESSION_KEY, JSON.stringify(session))
-  } catch { /* quota exceeded — ignore */ }
+  } catch {
+    // Quota exceeded — retry without uploaded images (base64 can be large)
+    try {
+      const stripped: Record<number, GraphicState> = {}
+      Object.entries(graphics).forEach(([k, g]) => {
+        stripped[Number(k)] = { ...g, uploadedImage: null }
+      })
+      localStorage.setItem(SESSION_KEY, JSON.stringify({ ...session, graphics: stripped }))
+    } catch { /* still too big — skip */ }
+  }
 }
 
 function clearSession() {
@@ -62,13 +77,17 @@ export default function App() {
   const [savedSession, setSavedSession] = useState<SavedSession | null>(loadSession)
   const [showResumePanel, setShowResumePanel] = useState(false)
 
-  // Auto-save to localStorage whenever presentation changes while presenting
+  // Auto-save to localStorage whenever presentation or graphics change while presenting
+  // Only save when no graphic is currently loading (avoid saving mid-generation state)
   useEffect(() => {
     if (state === 'presenting' && presentation) {
-      saveSession(presentation, slideCount)
-      setSavedSession(loadSession())
+      const anyLoading = Object.values(graphics).some(g => g.loading)
+      if (!anyLoading) {
+        saveSession(presentation, graphics, slideCount)
+        setSavedSession(loadSession())
+      }
     }
-  }, [presentation, state, slideCount])
+  }, [presentation, graphics, state, slideCount])
 
   const addUsage = (u: TokenUsage) =>
     setTotalUsage(prev => ({ input: prev.input + u.input, output: prev.output + u.output }))
@@ -190,7 +209,9 @@ export default function App() {
   const handleRestore = () => {
     if (!savedSession) return
     setPresentation(savedSession.presentation)
-    setGraphics(initGraphics(savedSession.presentation))
+    // Restore saved graphics (includes generated HTML and uploaded images)
+    // Fall back to empty init if graphics weren't saved in older sessions
+    setGraphics(savedSession.graphics ?? initGraphics(savedSession.presentation))
     setSlideCount(savedSession.slideCount)
     setTotalUsage({ input: 0, output: 0 })
     setState('presenting')
