@@ -61,6 +61,53 @@ async function waitForAnimations(el: HTMLElement): Promise<void> {
   ])
 }
 
+export async function exportPDF(
+  elements: HTMLElement[],
+  title: string,
+  bgColor = '#0A0A0A'
+): Promise<void> {
+  await Promise.all(elements.map(el => waitForAnimations(el)))
+
+  const dataUrls: string[] = []
+  for (const el of elements) {
+    const canvas = await toCanvas(el, bgColor)
+    dataUrls.push(canvas.toDataURL('image/jpeg', 0.95))
+  }
+
+  const win = window.open('', '_blank')
+  if (!win) return
+
+  const slideHtml = dataUrls.map(url =>
+    `<div class="slide"><img src="${url}" /></div>`
+  ).join('\n')
+
+  win.document.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>${title.replace(/</g, '&lt;')}</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: white; }
+  @page { size: 1280px 720px; margin: 0; }
+  .slide { width: 100%; page-break-after: always; break-after: page; }
+  .slide:last-child { page-break-after: avoid; break-after: avoid; }
+  img { width: 100%; display: block; }
+</style>
+</head>
+<body>
+${slideHtml}
+</body>
+</html>`)
+  win.document.close()
+
+  // Wait for images to load then trigger print
+  setTimeout(() => {
+    win.print()
+    win.close()
+  }, 600)
+}
+
 export async function exportPNG(
   elements: HTMLElement[],
   title: string,

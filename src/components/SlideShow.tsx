@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import type { Presentation, Slide, GraphicState, ThemeColors, TokenUsage } from '../types/slide'
 import { SlideRenderer } from './SlideRenderer'
 import { Logo } from './Logo'
-import { exportPNG, exportPPTX } from '../lib/export'
+import { exportPDF, exportPNG, exportPPTX } from '../lib/export'
 import { calcCost, formatCost } from '../lib/claude'
 
 interface SlideShowProps {
@@ -50,12 +50,12 @@ export function SlideShow({
 
   const handleExport = async (format: 'pdf' | 'png' | 'pptx') => {
     setExportMenu(false)
-    if (format === 'pdf') { window.print(); return }
     setExporting(true)
     try {
       // Brief pause for any lazy renders, then export.ts waits for animations per-element
       await new Promise(r => setTimeout(r, 500))
       const elements = exportRefs.current.filter(Boolean) as HTMLElement[]
+      if (format === 'pdf') await exportPDF(elements, presentation.title, colors.bg)
       if (format === 'png') await exportPNG(elements, presentation.title, colors.bg)
       if (format === 'pptx') await exportPPTX(elements, presentation.title, colors.bg)
     } finally {
