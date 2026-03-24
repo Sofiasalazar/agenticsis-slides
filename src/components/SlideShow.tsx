@@ -237,11 +237,14 @@ export function SlideShow({
         </div>
       </nav>
 
-      {/* Slide area */}
-      <div style={{ paddingTop: '56px', ...cssVars }}>
-        {/* Data-loss warning — persistent, always visible */}
+      {/* Slide area — flex column so warning banner + slide share space without overflow */}
+      <div style={{
+        paddingTop: '56px', height: '100vh', overflow: 'hidden',
+        display: 'flex', flexDirection: 'column', ...cssVars,
+      }}>
+        {/* Data-loss warning — takes its natural height, slide fills the rest */}
         <div className="no-print" style={{
-          display: 'flex', alignItems: 'center', gap: '8px',
+          flexShrink: 0, display: 'flex', alignItems: 'center', gap: '8px',
           padding: '8px 20px',
           background: 'rgba(251,191,36,0.05)', borderBottom: '1px solid rgba(251,191,36,0.15)',
         }}>
@@ -255,7 +258,8 @@ export function SlideShow({
           </p>
         </div>
 
-        <div className="print:hidden" style={cssVars}>
+        {/* Slide fills remaining vertical space */}
+        <div className="print:hidden" style={{ flex: 1, overflow: 'hidden', ...cssVars }}>
           <SlideRenderer
             slide={presentation.slides[current]}
             onUpdate={editMode ? s => onUpdateSlide(current, s) : undefined}
@@ -265,6 +269,7 @@ export function SlideShow({
             onClearGraphic={() => onClearGraphic(current)}
             onSkipGraphic={() => onSkipGraphic(current)}
             onUnskipGraphic={() => onUnskipGraphic(current)}
+            height="100%"
           />
         </div>
         <div className="print:block hidden">

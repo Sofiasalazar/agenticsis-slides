@@ -190,7 +190,7 @@ export function GraphicFrame({ graphic, onGenerate, onUpload, onClear, onSkip, o
       {/* Always-visible control bar when content exists */}
       {hasContent && !graphic.loading && !editingPrompt && (
         <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10,
+          position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 9999,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px',
           padding: '8px 10px',
           background: 'linear-gradient(to top, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.6) 70%, transparent 100%)',
@@ -231,7 +231,7 @@ export function GraphicFrame({ graphic, onGenerate, onUpload, onClear, onSkip, o
       {/* Regenerate prompt overlay on top of content */}
       {hasContent && !graphic.loading && editingPrompt && (
         <div style={{
-          position: 'absolute', inset: 0, zIndex: 20,
+          position: 'absolute', inset: 0, zIndex: 10000,
           background: 'rgba(10,10,10,0.92)', backdropFilter: 'blur(8px)',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px',
         }}>
