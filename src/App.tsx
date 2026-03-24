@@ -291,15 +291,15 @@ export default function App() {
               background: 'none', border: 'none', cursor: savedSession ? 'pointer' : 'default',
               fontFamily: 'inherit', padding: 0, display: 'flex', alignItems: 'center', gap: '6px',
             }}
-            title={savedSession ? 'Resume saved presentation' : 'No saved presentation'}
+            title={savedSession ? 'Saved only for this browser session — export before closing' : 'No saved presentation'}
           >
-            Slides
             {savedSession && (
               <span style={{
                 fontSize: '10px', fontWeight: 700, padding: '2px 6px', borderRadius: '999px',
                 background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', color: '#8b5cf6',
               }}>saved</span>
             )}
+            Slides
           </button>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -334,7 +334,7 @@ export default function App() {
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px' }}>
               <div>
                 <p style={{ fontSize: '12px', fontWeight: 700, color: '#8b5cf6', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '4px' }}>
-                  Saved session
+                  Saved — this browser session only
                 </p>
                 <p style={{ fontSize: '15px', fontWeight: 600, color: '#F5F5F5', marginBottom: '4px' }}>
                   {savedSession.presentation.title}
