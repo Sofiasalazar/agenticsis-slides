@@ -29,7 +29,6 @@ export function SlideShow({
   const [exportMenu, setExportMenu] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [editMode, setEditMode] = useState(true)
-  const [warningDismissed, setWarningDismissed] = useState(false)
   const [generatingAll, setGeneratingAll] = useState(false)
   const exportRefs = useRef<(HTMLDivElement | null)[]>([])
   const total = presentation.slides.length
@@ -54,7 +53,7 @@ export function SlideShow({
     if (format === 'pdf') { window.print(); return }
     setExporting(true)
     try {
-      await new Promise(r => setTimeout(r, 150))
+      await new Promise(r => setTimeout(r, 2000))
       const elements = exportRefs.current.filter(Boolean) as HTMLElement[]
       if (format === 'png') await exportPNG(elements, presentation.title)
       if (format === 'pptx') await exportPPTX(elements, presentation.title)
@@ -239,34 +238,21 @@ export function SlideShow({
 
       {/* Slide area */}
       <div style={{ paddingTop: '56px', ...cssVars }}>
-        {/* Data-loss warning banner */}
-        {!warningDismissed && (
-          <div className="no-print" style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
-            padding: '10px 20px',
-            background: 'rgba(251,191,36,0.06)', borderBottom: '1px solid rgba(251,191,36,0.18)',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
-                <path d="M8 1.5L14.5 13H1.5L8 1.5Z" stroke="#fbbf24" strokeWidth="1.5" strokeLinejoin="round" />
-                <path d="M8 6v3.5" stroke="#fbbf24" strokeWidth="1.5" strokeLinecap="round" />
-                <circle cx="8" cy="11.5" r="0.75" fill="#fbbf24" />
-              </svg>
-              <p style={{ fontSize: '12px', color: '#A3A3A3', margin: 0 }}>
-                <strong style={{ color: '#fbbf24' }}>No data is saved.</strong> Export your slides before refreshing or closing this tab.
-              </p>
-            </div>
-            <button
-              onClick={() => setWarningDismissed(true)}
-              style={{
-                fontSize: '12px', color: '#525252', background: 'none', border: 'none',
-                cursor: 'pointer', padding: '2px 6px', flexShrink: 0, fontFamily: 'inherit',
-              }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#A3A3A3')}
-              onMouseLeave={e => (e.currentTarget.style.color = '#525252')}
-            >Dismiss</button>
-          </div>
-        )}
+        {/* Data-loss warning — persistent, always visible */}
+        <div className="no-print" style={{
+          display: 'flex', alignItems: 'center', gap: '8px',
+          padding: '8px 20px',
+          background: 'rgba(251,191,36,0.05)', borderBottom: '1px solid rgba(251,191,36,0.15)',
+        }}>
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
+            <path d="M8 1.5L14.5 13H1.5L8 1.5Z" stroke="#fbbf24" strokeWidth="1.5" strokeLinejoin="round" />
+            <path d="M8 6v3.5" stroke="#fbbf24" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="8" cy="11.5" r="0.75" fill="#fbbf24" />
+          </svg>
+          <p style={{ fontSize: '11px', color: '#737373', margin: 0 }}>
+            <strong style={{ color: '#fbbf24', fontWeight: 600 }}>This app has no database.</strong> Your slides live only in this browser tab. Refreshing or closing will erase everything. <strong style={{ color: '#F5F5F5' }}>Export before leaving.</strong>
+          </p>
+        </div>
 
         <div className="print:hidden" style={cssVars}>
           <SlideRenderer
@@ -288,7 +274,7 @@ export function SlideShow({
       </div>
 
       {/* Hidden export container */}
-      <div aria-hidden style={{ position: 'fixed', left: '-9999px', top: 0, zIndex: -1, pointerEvents: 'none', ...cssVars }}>
+      <div aria-hidden className="is-exporting" style={{ position: 'fixed', left: '-9999px', top: 0, zIndex: -1, pointerEvents: 'none', ...cssVars }}>
         {presentation.slides.map((slide, i) => (
           <div
             key={i}

@@ -21,7 +21,7 @@ export function CtaSlide({ slide, onUpdate, graphic, onRegenerateGraphic, onUplo
   return (
     <div className="slide-page" style={{
       height: h, minHeight: h, display: 'grid', gridTemplateColumns: '45fr 55fr',
-      background: '#0A0A0A', position: 'relative', overflow: 'hidden',
+      background: 'var(--color-bg, #0A0A0A)', position: 'relative', overflow: 'hidden',
     }}>
       {/* Graphic panel — left side */}
       <div style={{ borderRight: '1px solid #1a1a1a', overflow: 'hidden' }}>

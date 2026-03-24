@@ -21,7 +21,7 @@ export function QuoteSlide({ slide, onUpdate, graphic, onRegenerateGraphic, onUp
   return (
     <div className="slide-page" style={{
       height: h, minHeight: h, display: 'grid', gridTemplateColumns: '55fr 45fr',
-      background: '#0A0A0A', position: 'relative', overflow: 'hidden',
+      background: 'var(--color-bg, #0A0A0A)', position: 'relative', overflow: 'hidden',
     }}>
       {/* Radial bg */}
       <div style={{

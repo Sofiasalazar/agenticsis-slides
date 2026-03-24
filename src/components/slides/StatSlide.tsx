@@ -27,7 +27,7 @@ export function StatSlide({ slide, onUpdate, graphic, onRegenerateGraphic, onUpl
   return (
     <div className="slide-page" style={{
       height: h, minHeight: h, display: 'grid', gridTemplateColumns: '55fr 45fr',
-      background: '#0A0A0A', overflow: 'hidden',
+      background: 'var(--color-bg, #0A0A0A)', overflow: 'hidden',
     }}>
       {/* Content */}
       <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '64px 48px 64px 64px', overflow: 'hidden' }}>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Presentation, Slide, GraphicState, ThemeColors, TokenUsage } from './types/slide'
 import { generatePresentation, generateSlideGraphic, getSlideContext } from './lib/claude'
 import { SlideShow } from './components/SlideShow'
@@ -16,6 +16,35 @@ const EXAMPLES = [
 ]
 
 const DEFAULT_THEME: ThemeColors = { primary: '#8b5cf6', accent: '#84cc16', bg: '#0A0A0A' }
+const SESSION_KEY = 'agenticsis_slides_session'
+
+interface SavedSession {
+  presentation: Presentation
+  savedAt: string
+  slideCount: number
+}
+
+function loadSession(): SavedSession | null {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch { return null }
+}
+
+function saveSession(presentation: Presentation, slideCount: number) {
+  try {
+    const session: SavedSession = {
+      presentation,
+      slideCount,
+      savedAt: new Date().toISOString(),
+    }
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session))
+  } catch { /* quota exceeded — ignore */ }
+}
+
+function clearSession() {
+  localStorage.removeItem(SESSION_KEY)
+}
 
 export default function App() {
   const [state, setState] = useState<AppState>('input')
@@ -30,6 +59,16 @@ export default function App() {
   const [apiKey, setApiKey] = useState(getStoredApiKey)
   const [showKeyModal, setShowKeyModal] = useState(!getStoredApiKey())
   const [showKeySettings, setShowKeySettings] = useState(false)
+  const [savedSession, setSavedSession] = useState<SavedSession | null>(loadSession)
+  const [showResumePanel, setShowResumePanel] = useState(false)
+
+  // Auto-save to localStorage whenever presentation changes while presenting
+  useEffect(() => {
+    if (state === 'presenting' && presentation) {
+      saveSession(presentation, slideCount)
+      setSavedSession(loadSession())
+    }
+  }, [presentation, state, slideCount])
 
   const addUsage = (u: TokenUsage) =>
     setTotalUsage(prev => ({ input: prev.input + u.input, output: prev.output + u.output }))
@@ -148,12 +187,29 @@ export default function App() {
     }))
   }
 
+  const handleRestore = () => {
+    if (!savedSession) return
+    setPresentation(savedSession.presentation)
+    setGraphics(initGraphics(savedSession.presentation))
+    setSlideCount(savedSession.slideCount)
+    setTotalUsage({ input: 0, output: 0 })
+    setState('presenting')
+    setShowResumePanel(false)
+  }
+
+  const handleClearSaved = () => {
+    clearSession()
+    setSavedSession(null)
+    setShowResumePanel(false)
+  }
+
   const handleBack = () => {
     setState('input')
     setPresentation(null)
     setGraphics({})
     setStreamText('')
     setTotalUsage({ input: 0, output: 0 })
+    // savedSession stays — user can resume later
   }
 
   if (state === 'presenting' && presentation) {
@@ -206,7 +262,24 @@ export default function App() {
             Agenticsis
           </span>
           <span style={{ color: '#262626', margin: '0 4px' }}>|</span>
-          <span style={{ fontSize: '13px', color: '#525252', fontWeight: 500 }}>Slides</span>
+          <button
+            onClick={() => setShowResumePanel(v => !v)}
+            style={{
+              fontSize: '13px', fontWeight: 500,
+              color: savedSession ? '#8b5cf6' : '#525252',
+              background: 'none', border: 'none', cursor: savedSession ? 'pointer' : 'default',
+              fontFamily: 'inherit', padding: 0, display: 'flex', alignItems: 'center', gap: '6px',
+            }}
+            title={savedSession ? 'Resume saved presentation' : 'No saved presentation'}
+          >
+            Slides
+            {savedSession && (
+              <span style={{
+                fontSize: '10px', fontWeight: 700, padding: '2px 6px', borderRadius: '999px',
+                background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', color: '#8b5cf6',
+              }}>saved</span>
+            )}
+          </button>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button
@@ -229,6 +302,62 @@ export default function App() {
           }}>Beta</span>
         </div>
       </nav>
+
+      {/* Resume panel — shows when savedSession exists and user clicks "Slides" */}
+      {showResumePanel && savedSession && (
+        <div style={{
+          background: 'rgba(139,92,246,0.06)', borderBottom: '1px solid rgba(139,92,246,0.2)',
+          padding: '16px 40px',
+        }}>
+          <div style={{ maxWidth: '640px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px' }}>
+              <div>
+                <p style={{ fontSize: '12px', fontWeight: 700, color: '#8b5cf6', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '4px' }}>
+                  Saved session
+                </p>
+                <p style={{ fontSize: '15px', fontWeight: 600, color: '#F5F5F5', marginBottom: '4px' }}>
+                  {savedSession.presentation.title}
+                </p>
+                <p style={{ fontSize: '12px', color: '#525252' }}>
+                  {savedSession.presentation.slides.length} slides · Saved {new Date(savedSession.savedAt).toLocaleString()}
+                </p>
+                {/* Data-loss warning prominently here */}
+                <div style={{ marginTop: '10px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, marginTop: '1px' }}>
+                    <path d="M8 1.5L14.5 13H1.5L8 1.5Z" stroke="#fbbf24" strokeWidth="1.5" strokeLinejoin="round" />
+                    <path d="M8 6v3.5" stroke="#fbbf24" strokeWidth="1.5" strokeLinecap="round" />
+                    <circle cx="8" cy="11.5" r="0.75" fill="#fbbf24" />
+                  </svg>
+                  <p style={{ fontSize: '11px', color: '#737373', margin: 0, lineHeight: 1.5 }}>
+                    <strong style={{ color: '#fbbf24' }}>No database.</strong> This app saves only to your browser. If you clear browser data or use a different device, this session is gone. <strong style={{ color: '#F5F5F5' }}>Always export before closing the tab.</strong>
+                  </p>
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flexShrink: 0 }}>
+                <button
+                  onClick={handleRestore}
+                  style={{
+                    padding: '8px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: 600,
+                    background: 'linear-gradient(135deg, #8b5cf6, #9333ea)',
+                    border: '1px solid rgba(139,92,246,0.4)', color: '#F5F5F5',
+                    cursor: 'pointer', fontFamily: 'inherit',
+                  }}
+                >Resume</button>
+                <button
+                  onClick={handleClearSaved}
+                  style={{
+                    padding: '6px 20px', borderRadius: '8px', fontSize: '12px', fontWeight: 500,
+                    background: 'none', border: '1px solid #262626', color: '#525252',
+                    cursor: 'pointer', fontFamily: 'inherit',
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.color = '#fca5a5')}
+                  onMouseLeave={e => (e.currentTarget.style.color = '#525252')}
+                >Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Hero area */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 24px', position: 'relative', overflow: 'hidden' }}>
