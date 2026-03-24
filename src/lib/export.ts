@@ -74,15 +74,19 @@ export async function exportPDF(
     dataUrls.push(canvas.toDataURL('image/jpeg', 0.95))
   }
 
-  const win = window.open('', '_blank')
-  if (!win) return
+  // Use a hidden iframe so the print dialog is never blocked by popup blockers.
+  // (window.open fails when called after async awaits — user gesture is lost.)
+  const iframe = document.createElement('iframe')
+  iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:1px;height:1px;border:none;visibility:hidden;'
+  document.body.appendChild(iframe)
 
   const slideHtml = dataUrls.map(url =>
     `<div class="slide"><img src="${url}" /></div>`
   ).join('\n')
 
-  win.document.write(`<!DOCTYPE html>
-<html>
+  const doc = iframe.contentDocument!
+  doc.open()
+  doc.write(`<!DOCTYPE html><html>
 <head>
 <meta charset="utf-8">
 <title>${title.replace(/</g, '&lt;')}</title>
@@ -99,13 +103,13 @@ export async function exportPDF(
 ${slideHtml}
 </body>
 </html>`)
-  win.document.close()
+  doc.close()
 
-  // Wait for images to load then trigger print
-  setTimeout(() => {
-    win.print()
-    win.close()
-  }, 600)
+  // Brief wait for images to render inside the iframe, then print
+  await new Promise(r => setTimeout(r, 600))
+  iframe.contentWindow!.print()
+  // Remove iframe after a short delay to let the print dialog open
+  setTimeout(() => { if (document.body.contains(iframe)) document.body.removeChild(iframe) }, 2000)
 }
 
 export async function exportPNG(
