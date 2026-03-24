@@ -588,14 +588,21 @@ export default function App() {
           fontSize: '14px', color: '#737373', marginTop: '12px',
           position: 'relative', zIndex: 1,
         }}>
-          Reach out at{' '}
           <a
-            href="mailto:hello@agenticsis.top"
+            href="https://www.agenticsis.top/contact"
+            target="_blank" rel="noopener noreferrer"
             style={{ color: '#8b5cf6', fontWeight: 600, textDecoration: 'none' }}
             onMouseEnter={e => (e.currentTarget.style.color = '#a78bfa')}
             onMouseLeave={e => (e.currentTarget.style.color = '#8b5cf6')}
-          >hello@agenticsis.top</a>
-          {' '}and we'll make it yours.
+          >Get in touch</a>
+          {' '}or write to{' '}
+          <a
+            href="mailto:info@agenticsis.top"
+            style={{ color: '#8b5cf6', fontWeight: 600, textDecoration: 'none' }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#a78bfa')}
+            onMouseLeave={e => (e.currentTarget.style.color = '#8b5cf6')}
+          >info@agenticsis.top</a>
+          {' '}— we'll make it yours.
         </p>
       </div>
 
