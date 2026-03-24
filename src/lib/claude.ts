@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
-import type { Presentation, Slide } from '../types/slide'
-import { SYSTEM_PROMPT, GRAPHIC_SYSTEM_PROMPT, buildUserPrompt, buildGraphicPrompt } from './prompt'
+import type { Presentation, Slide, ThemeColors, TokenUsage } from '../types/slide'
+import { buildSystemPrompt, buildGraphicSystemPrompt, buildUserPrompt, buildGraphicPrompt } from './prompt'
 
 function makeClient(apiKey: string) {
   return new Anthropic({ apiKey, dangerouslyAllowBrowser: true })
@@ -9,19 +9,29 @@ function makeClient(apiKey: string) {
 export async function generatePresentation(
   topic: string,
   apiKey: string,
+  slideCount: number,
+  colors: ThemeColors,
   onChunk: (text: string) => void
-): Promise<Presentation> {
+): Promise<{ presentation: Presentation; usage: TokenUsage }> {
   const client = makeClient(apiKey)
   let accumulated = ''
+  let inputTokens = 0
+  let outputTokens = 0
 
   const stream = client.messages.stream({
     model: 'claude-opus-4-6',
-    max_tokens: 6000,
-    system: SYSTEM_PROMPT,
+    max_tokens: 8000,
+    system: buildSystemPrompt(slideCount, colors),
     messages: [{ role: 'user', content: buildUserPrompt(topic) }],
   })
 
   for await (const event of stream) {
+    if (event.type === 'message_start') {
+      inputTokens = event.message.usage.input_tokens
+    }
+    if (event.type === 'message_delta' && 'usage' in event) {
+      outputTokens = (event as { usage: { output_tokens: number } }).usage.output_tokens
+    }
     if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
       accumulated += event.delta.text
       onChunk(accumulated)
@@ -33,20 +43,24 @@ export async function generatePresentation(
     ? trimmed.replace(/^```[a-z]*\n?/, '').replace(/\n?```$/, '')
     : trimmed
 
-  return JSON.parse(jsonStr) as Presentation
+  return {
+    presentation: JSON.parse(jsonStr) as Presentation,
+    usage: { input: inputTokens, output: outputTokens },
+  }
 }
 
 export async function generateSlideGraphic(
   prompt: string,
   slideContext: string,
-  apiKey: string
-): Promise<string> {
+  apiKey: string,
+  colors: ThemeColors
+): Promise<{ html: string; usage: TokenUsage }> {
   const client = makeClient(apiKey)
 
   const response = await client.messages.create({
     model: 'claude-opus-4-6',
     max_tokens: 3000,
-    system: GRAPHIC_SYSTEM_PROMPT,
+    system: buildGraphicSystemPrompt(colors),
     messages: [{ role: 'user', content: buildGraphicPrompt(prompt, slideContext) }],
   })
 
@@ -57,7 +71,11 @@ export async function generateSlideGraphic(
   if (html.startsWith('```')) {
     html = html.replace(/^```[a-z]*\n?/, '').replace(/\n?```$/, '').trim()
   }
-  return html
+
+  return {
+    html,
+    usage: { input: response.usage.input_tokens, output: response.usage.output_tokens },
+  }
 }
 
 export function getSlideContext(slide: Slide): string {
@@ -70,4 +88,17 @@ export function getSlideContext(slide: Slide): string {
     case 'cta':     return `${slide.headline}. ${slide.subtext}`
     default:        return ''
   }
+}
+
+// Pricing for claude-opus-4-6 (approximate — check console.anthropic.com for latest)
+const INPUT_COST = 15 / 1_000_000   // $15 per 1M input tokens
+const OUTPUT_COST = 75 / 1_000_000  // $75 per 1M output tokens
+
+export function calcCost(usage: TokenUsage): number {
+  return usage.input * INPUT_COST + usage.output * OUTPUT_COST
+}
+
+export function formatCost(usd: number): string {
+  if (usd < 0.01) return `${(usd * 100).toFixed(2)}¢`
+  return `$${usd.toFixed(3)}`
 }

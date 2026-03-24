@@ -32,7 +32,7 @@ html, body, #root {
 
 /* Brand utilities */
 .gradient-text {
-  background: linear-gradient(90deg, #8b5cf6, #9333ea 50%, #84cc16);
+  background: linear-gradient(90deg, var(--color-primary, #8b5cf6), var(--color-accent, #84cc16));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -56,7 +56,7 @@ html, body, #root {
 }
 
 .accent-bar {
-  background: linear-gradient(to bottom, #8b5cf6, #9333ea 50%, #84cc16);
+  background: linear-gradient(to bottom, var(--color-primary, #8b5cf6), var(--color-accent, #84cc16));
 }
 
 /* Inline editing */

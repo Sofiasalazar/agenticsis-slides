@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { Presentation, Slide, GraphicState } from './types/slide'
+import type { Presentation, Slide, GraphicState, ThemeColors, TokenUsage } from './types/slide'
 import { generatePresentation, generateSlideGraphic, getSlideContext } from './lib/claude'
 import { SlideShow } from './components/SlideShow'
 import { Logo } from './components/Logo'
@@ -15,16 +15,24 @@ const EXAMPLES = [
   'The case for AI implementation now',
 ]
 
+const DEFAULT_THEME: ThemeColors = { primary: '#8b5cf6', accent: '#84cc16', bg: '#0A0A0A' }
+
 export default function App() {
   const [state, setState] = useState<AppState>('input')
   const [topic, setTopic] = useState('')
+  const [slideCount, setSlideCount] = useState(8)
+  const [theme, setTheme] = useState<ThemeColors>(DEFAULT_THEME)
   const [presentation, setPresentation] = useState<Presentation | null>(null)
   const [graphics, setGraphics] = useState<Record<number, GraphicState>>({})
+  const [totalUsage, setTotalUsage] = useState<TokenUsage>({ input: 0, output: 0 })
   const [streamText, setStreamText] = useState('')
   const [error, setError] = useState('')
   const [apiKey, setApiKey] = useState(getStoredApiKey)
   const [showKeyModal, setShowKeyModal] = useState(!getStoredApiKey())
   const [showKeySettings, setShowKeySettings] = useState(false)
+
+  const addUsage = (u: TokenUsage) =>
+    setTotalUsage(prev => ({ input: prev.input + u.input, output: prev.output + u.output }))
 
   const handleSaveKey = (key: string) => {
     setStoredApiKey(key)
@@ -40,7 +48,8 @@ export default function App() {
         html: null,
         uploadedImage: null,
         loading: false,
-        prompt: slide.graphicPrompt || `Abstract visual for a ${slide.type} slide`,
+        prompt: slide.graphicPrompt || `Chart or diagram for: ${slide.type} slide`,
+        skipped: false,
       }
     })
     return g
@@ -51,11 +60,15 @@ export default function App() {
     setState('generating')
     setError('')
     setStreamText('')
+    setTotalUsage({ input: 0, output: 0 })
 
     try {
-      const result = await generatePresentation(topic, apiKey, chunk => setStreamText(chunk))
-      setPresentation(result)
-      setGraphics(initGraphics(result))
+      const { presentation: pres, usage } = await generatePresentation(
+        topic, apiKey, slideCount, theme, chunk => setStreamText(chunk)
+      )
+      addUsage(usage)
+      setPresentation(pres)
+      setGraphics(initGraphics(pres))
       setState('presenting')
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Something went wrong'
@@ -79,17 +92,31 @@ export default function App() {
 
     setGraphics(prev => ({
       ...prev,
-      [index]: { ...prev[index], loading: true, prompt },
+      [index]: { ...prev[index], loading: true, prompt, skipped: false },
     }))
 
     try {
-      const html = await generateSlideGraphic(prompt, getSlideContext(slide), apiKey)
+      const { html, usage } = await generateSlideGraphic(prompt, getSlideContext(slide), apiKey, theme)
+      addUsage(usage)
       setGraphics(prev => ({
         ...prev,
         [index]: { ...prev[index], loading: false, html, uploadedImage: null },
       }))
     } catch {
       setGraphics(prev => ({ ...prev, [index]: { ...prev[index], loading: false } }))
+    }
+  }
+
+  const handleGenerateAllGraphics = async () => {
+    if (!presentation || !apiKey) return
+    const toGenerate = presentation.slides
+      .map((_, i) => i)
+      .filter(i => {
+        const g = graphics[i]
+        return g && !g.skipped && !g.html && !g.uploadedImage && !g.loading
+      })
+    for (const i of toGenerate) {
+      await handleRegenerateGraphic(i)
     }
   }
 
@@ -107,11 +134,26 @@ export default function App() {
     }))
   }
 
+  const handleSkipGraphic = (index: number) => {
+    setGraphics(prev => ({
+      ...prev,
+      [index]: { ...prev[index], html: null, uploadedImage: null, skipped: true },
+    }))
+  }
+
+  const handleUnskipGraphic = (index: number) => {
+    setGraphics(prev => ({
+      ...prev,
+      [index]: { ...prev[index], skipped: false },
+    }))
+  }
+
   const handleBack = () => {
     setState('input')
     setPresentation(null)
     setGraphics({})
     setStreamText('')
+    setTotalUsage({ input: 0, output: 0 })
   }
 
   if (state === 'presenting' && presentation) {
@@ -120,10 +162,15 @@ export default function App() {
         <SlideShow
           presentation={presentation}
           graphics={graphics}
+          totalUsage={totalUsage}
+          colors={theme}
           onUpdateSlide={handleUpdateSlide}
           onRegenerateGraphic={handleRegenerateGraphic}
           onUploadImage={handleUploadImage}
           onClearGraphic={handleClearGraphic}
+          onSkipGraphic={handleSkipGraphic}
+          onUnskipGraphic={handleUnskipGraphic}
+          onGenerateAllGraphics={handleGenerateAllGraphics}
           onBack={handleBack}
         />
         {showKeySettings && (
@@ -131,6 +178,11 @@ export default function App() {
         )}
       </>
     )
+  }
+
+  const colorInputStyle = {
+    width: '36px', height: '36px', borderRadius: '8px', border: '1px solid #262626',
+    cursor: 'pointer', padding: '2px', background: 'rgba(255,255,255,0.05)',
   }
 
   return (
@@ -237,11 +289,75 @@ export default function App() {
                 width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid #262626',
                 borderRadius: '12px', padding: '12px 16px', fontSize: '14px', color: '#F5F5F5',
                 fontFamily: 'inherit', resize: 'none', outline: 'none',
-                transition: 'border-color 0.15s', marginBottom: '16px', lineHeight: 1.6,
+                transition: 'border-color 0.15s', marginBottom: '20px', lineHeight: 1.6,
               }}
               onFocus={e => (e.currentTarget.style.borderColor = 'rgba(139,92,246,0.6)')}
               onBlur={e => (e.currentTarget.style.borderColor = '#262626')}
             />
+
+            {/* Slide count + colors */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+              {/* Slide count */}
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#A3A3A3', marginBottom: '8px', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                  Number of slides
+                </label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <input
+                    type="range"
+                    min={5} max={15} value={slideCount}
+                    onChange={e => setSlideCount(Number(e.target.value))}
+                    style={{ flex: 1, accentColor: '#8b5cf6' }}
+                  />
+                  <span style={{
+                    fontSize: '13px', fontWeight: 700, color: '#F5F5F5',
+                    minWidth: '28px', textAlign: 'center',
+                    background: 'rgba(139,92,246,0.12)', borderRadius: '6px', padding: '2px 6px',
+                  }}>{slideCount}</span>
+                </div>
+              </div>
+
+              {/* Colors */}
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#A3A3A3', marginBottom: '8px', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                  Slide colors
+                </label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                    <input type="color" value={theme.primary}
+                      onChange={e => setTheme(t => ({ ...t, primary: e.target.value }))}
+                      style={colorInputStyle} title="Primary color"
+                    />
+                    <span style={{ fontSize: '9px', color: '#525252', fontWeight: 600, textTransform: 'uppercase' }}>Primary</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                    <input type="color" value={theme.accent}
+                      onChange={e => setTheme(t => ({ ...t, accent: e.target.value }))}
+                      style={colorInputStyle} title="Accent color"
+                    />
+                    <span style={{ fontSize: '9px', color: '#525252', fontWeight: 600, textTransform: 'uppercase' }}>Accent</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                    <input type="color" value={theme.bg}
+                      onChange={e => setTheme(t => ({ ...t, bg: e.target.value }))}
+                      style={colorInputStyle} title="Background color"
+                    />
+                    <span style={{ fontSize: '9px', color: '#525252', fontWeight: 600, textTransform: 'uppercase' }}>Background</span>
+                  </div>
+                  <button
+                    onClick={() => setTheme(DEFAULT_THEME)}
+                    title="Reset to default colors"
+                    style={{
+                      fontSize: '10px', color: '#525252', background: 'none', border: '1px solid #262626',
+                      borderRadius: '6px', padding: '4px 8px', cursor: 'pointer', fontFamily: 'inherit',
+                      alignSelf: 'flex-start', marginTop: '1px',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#A3A3A3')}
+                    onMouseLeave={e => (e.currentTarget.style.color = '#525252')}
+                  >Reset</button>
+                </div>
+              </div>
+            </div>
 
             {error && (
               <div style={{
@@ -265,27 +381,11 @@ export default function App() {
               onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.98)' }}
               onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
             >
-              {!apiKey ? 'Add API key to generate' : 'Generate Presentation'}
+              {!apiKey ? 'Add API key to generate' : `Generate ${slideCount} Slides`}
             </button>
 
             <p style={{ textAlign: 'center', fontSize: '11px', color: '#525252', marginTop: '10px' }}>
               ⌘ + Enter to generate
-            </p>
-          </div>
-
-          {/* Data loss warning */}
-          <div style={{
-            marginTop: '16px', display: 'flex', alignItems: 'flex-start', gap: '10px',
-            padding: '12px 16px', borderRadius: '12px',
-            background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)',
-          }}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, marginTop: '1px' }}>
-              <path d="M8 1.5L14.5 13H1.5L8 1.5Z" stroke="#fbbf24" strokeWidth="1.5" strokeLinejoin="round" />
-              <path d="M8 6v3.5" stroke="#fbbf24" strokeWidth="1.5" strokeLinecap="round" />
-              <circle cx="8" cy="11.5" r="0.75" fill="#fbbf24" />
-            </svg>
-            <p style={{ fontSize: '12px', color: '#A3A3A3', lineHeight: 1.6, margin: 0 }}>
-              <strong style={{ color: '#fbbf24' }}>No data is saved.</strong> If you refresh or close this tab, your presentation will be lost. Download your slides (PDF, PNG, or PPTX) before leaving the page.
             </p>
           </div>
 
@@ -340,7 +440,7 @@ export default function App() {
             <p style={{ fontSize: '18px', fontWeight: 600, color: '#F5F5F5', marginBottom: '8px', letterSpacing: '-0.01em' }}>
               Building your presentation
             </p>
-            <p style={{ fontSize: '14px', color: '#A3A3A3' }}>Claude is designing your slides...</p>
+            <p style={{ fontSize: '14px', color: '#A3A3A3' }}>Claude is designing your {slideCount} slides...</p>
           </div>
           {streamText && (
             <div style={{

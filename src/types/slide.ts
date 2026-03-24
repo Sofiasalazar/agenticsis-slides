@@ -1,5 +1,11 @@
 export type SlideType = 'hero' | 'bullets' | 'split' | 'quote' | 'cta' | 'stat'
 
+export interface ThemeColors {
+  primary: string   // e.g. '#8b5cf6'
+  accent: string    // e.g. '#84cc16'
+  bg: string        // e.g. '#0A0A0A'
+}
+
 export interface HeroSlide {
   type: 'hero'
   title: string
@@ -62,4 +68,10 @@ export interface GraphicState {
   uploadedImage: string | null
   loading: boolean
   prompt: string
+  skipped: boolean
+}
+
+export interface TokenUsage {
+  input: number
+  output: number
 }

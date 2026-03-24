@@ -8,11 +8,13 @@ interface Props {
   onRegenerateGraphic?: (prompt?: string) => void
   onUploadImage?: (dataUrl: string) => void
   onClearGraphic?: () => void
+  onSkipGraphic?: () => void
+  onUnskipGraphic?: () => void
   isExporting?: boolean
   height?: string
 }
 
-export function HeroSlide({ slide, onUpdate, graphic, onRegenerateGraphic, onUploadImage, onClearGraphic, isExporting, height }: Props) {
+export function HeroSlide({ slide, onUpdate, graphic, onRegenerateGraphic, onUploadImage, onClearGraphic, onSkipGraphic, onUnskipGraphic, isExporting, height }: Props) {
   const h = height ?? 'calc(100vh - 56px)'
   const editable = !!onUpdate && !isExporting
 
@@ -90,6 +92,8 @@ export function HeroSlide({ slide, onUpdate, graphic, onRegenerateGraphic, onUpl
             onGenerate={p => onRegenerateGraphic?.(p)}
             onUpload={d => onUploadImage?.(d)}
             onClear={() => onClearGraphic?.()}
+            onSkip={() => onSkipGraphic?.()}
+            onUnskip={() => onUnskipGraphic?.()}
             isExporting={isExporting}
           />
         )}
