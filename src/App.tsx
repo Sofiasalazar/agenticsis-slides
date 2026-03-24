@@ -562,6 +562,43 @@ export default function App() {
         </div>
       </div>
 
+      {/* CTA band */}
+      <div style={{
+        borderTop: '1px solid #1a1a1a',
+        padding: '40px 24px',
+        textAlign: 'center',
+        background: 'linear-gradient(180deg, transparent 0%, rgba(139,92,246,0.04) 100%)',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        <div style={{
+          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+          width: '600px', height: '200px', pointerEvents: 'none',
+          background: 'radial-gradient(ellipse, rgba(139,92,246,0.08) 0%, transparent 70%)',
+        }} />
+        <p style={{
+          fontSize: 'clamp(15px, 2vw, 20px)', fontWeight: 600,
+          color: '#F5F5F5', lineHeight: 1.6,
+          letterSpacing: '-0.01em', margin: '0 auto', maxWidth: '560px',
+          position: 'relative', zIndex: 1,
+        }}>
+          Want this tool customized for your brand — or need something built from scratch?{' '}
+          <span className="gradient-text">We build AI-powered tools that work for your business.</span>
+        </p>
+        <p style={{
+          fontSize: '14px', color: '#737373', marginTop: '12px',
+          position: 'relative', zIndex: 1,
+        }}>
+          Reach out at{' '}
+          <a
+            href="mailto:hello@agenticsis.top"
+            style={{ color: '#8b5cf6', fontWeight: 600, textDecoration: 'none' }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#a78bfa')}
+            onMouseLeave={e => (e.currentTarget.style.color = '#8b5cf6')}
+          >hello@agenticsis.top</a>
+          {' '}and we'll make it yours.
+        </p>
+      </div>
+
       {/* Footer */}
       <footer style={{
         borderTop: '1px solid #262626', padding: '20px 40px',
