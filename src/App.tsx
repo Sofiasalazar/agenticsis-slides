@@ -114,7 +114,8 @@ export default function App() {
   }
 
   const handleGenerate = async () => {
-    if (!topic.trim() || !apiKey) return
+    if (!topic.trim()) return
+    if (!apiKey) { setShowKeyModal(true); return }
     setState('generating')
     setError('')
     setStreamText('')
@@ -265,7 +266,7 @@ export default function App() {
   return (
     <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', flexDirection: 'column' }}>
       {/* API Key modals */}
-      {showKeyModal && <ApiKeyModal onSave={handleSaveKey} />}
+      {showKeyModal && <ApiKeyModal onSave={handleSaveKey} onClose={() => setShowKeyModal(false)} />}
       {showKeySettings && !showKeyModal && (
         <ApiKeyModal isSettings onSave={handleSaveKey} onClose={() => setShowKeySettings(false)} />
       )}
@@ -518,16 +519,16 @@ export default function App() {
 
             <button
               onClick={handleGenerate}
-              disabled={!topic.trim() || !apiKey}
+              disabled={!topic.trim()}
               style={{
                 width: '100%', padding: '12px', borderRadius: '12px', fontWeight: 600, fontSize: '14px',
                 background: 'linear-gradient(135deg, #8b5cf6, #9333ea)',
                 border: '1px solid rgba(139,92,246,0.4)', color: '#F5F5F5',
-                cursor: (topic.trim() && apiKey) ? 'pointer' : 'not-allowed',
-                opacity: (topic.trim() && apiKey) ? 1 : 0.4, transition: 'all 0.15s', letterSpacing: '-0.01em',
+                cursor: topic.trim() ? 'pointer' : 'not-allowed',
+                opacity: topic.trim() ? 1 : 0.4, transition: 'all 0.15s', letterSpacing: '-0.01em',
               }}
-              onMouseEnter={e => { if (topic.trim() && apiKey) e.currentTarget.style.opacity = '0.88' }}
-              onMouseLeave={e => { e.currentTarget.style.opacity = (topic.trim() && apiKey) ? '1' : '0.4' }}
+              onMouseEnter={e => { if (topic.trim()) e.currentTarget.style.opacity = '0.88' }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = topic.trim() ? '1' : '0.4' }}
               onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.98)' }}
               onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
             >
