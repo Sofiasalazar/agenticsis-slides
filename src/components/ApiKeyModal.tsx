@@ -47,16 +47,31 @@ export function ApiKeyModal({ onSave, isSettings, onClose }: ApiKeyModalProps) {
         boxShadow: '0 0 80px rgba(139,92,246,0.12)',
       }}>
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '28px' }}>
-          <Logo size={28} color="#FFFFFF" />
-          <div>
-            <p style={{ fontSize: '15px', fontWeight: 700, color: '#F5F5F5', letterSpacing: '-0.01em' }}>
-              {isSettings ? 'Update API Key' : 'Connect your Anthropic key'}
-            </p>
-            <p style={{ fontSize: '12px', color: '#525252', marginTop: '2px' }}>
-              Stored locally — never shared
-            </p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Logo size={28} color="#FFFFFF" />
+            <div>
+              <p style={{ fontSize: '15px', fontWeight: 700, color: '#F5F5F5', letterSpacing: '-0.01em' }}>
+                {isSettings ? 'Update API Key' : 'Connect your Anthropic key'}
+              </p>
+              <p style={{ fontSize: '12px', color: '#525252', marginTop: '2px' }}>
+                Stored locally — never shared
+              </p>
+            </div>
           </div>
+          {onClose && (
+            <button
+              onClick={onClose}
+              title="Close"
+              style={{
+                background: 'none', border: 'none', color: '#525252', cursor: 'pointer',
+                fontSize: '18px', lineHeight: 1, padding: '4px', borderRadius: '6px',
+                transition: 'color 0.15s', flexShrink: 0,
+              }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#F5F5F5')}
+              onMouseLeave={e => (e.currentTarget.style.color = '#525252')}
+            >✕</button>
+          )}
         </div>
 
         {!isSettings && (
@@ -125,7 +140,7 @@ export function ApiKeyModal({ onSave, isSettings, onClose }: ApiKeyModalProps) {
 
         {/* Buttons */}
         <div style={{ display: 'flex', gap: '10px' }}>
-          {isSettings && onClose && (
+          {onClose && (
             <button
               onClick={onClose}
               style={{
