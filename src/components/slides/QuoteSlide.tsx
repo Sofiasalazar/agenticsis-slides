@@ -51,7 +51,7 @@ export function QuoteSlide({ slide, onUpdate, graphic, onRegenerateGraphic, onUp
           onBlur={e => onUpdate?.({ ...slide, quote: e.currentTarget.textContent || slide.quote })}
           style={{
             fontSize: 'clamp(18px, 2.2vw, 28px)', fontWeight: 500,
-            color: '#F5F5F5', lineHeight: 1.55, letterSpacing: '-0.01em',
+            color: 'var(--color-text, #F5F5F5)', lineHeight: 1.55, letterSpacing: '-0.01em',
             marginBottom: '28px', outline: 'none',
           }}
         >{slide.quote}</blockquote>
@@ -71,7 +71,7 @@ export function QuoteSlide({ slide, onUpdate, graphic, onRegenerateGraphic, onUp
             suppressContentEditableWarning
             className={editable ? 'editable' : ''}
             onBlur={e => onUpdate?.({ ...slide, context: e.currentTarget.textContent || '' })}
-            style={{ fontSize: '12px', color: '#525252', outline: 'none' }}
+            style={{ fontSize: '12px', color: 'var(--color-text-dim, #525252)', outline: 'none' }}
           >{slide.context}</p>
         )}
       </div>

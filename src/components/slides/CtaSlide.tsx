@@ -63,7 +63,7 @@ export function CtaSlide({ slide, onUpdate, graphic, onRegenerateGraphic, onUplo
           style={{
             fontSize: 'clamp(26px, 4vw, 52px)', fontWeight: 700,
             letterSpacing: '-0.03em', lineHeight: 1.08,
-            color: '#F5F5F5', marginBottom: '16px', outline: 'none',
+            color: 'var(--color-text, #F5F5F5)', marginBottom: '16px', outline: 'none',
           }}
         >{slide.headline}</h2>
 
@@ -74,7 +74,7 @@ export function CtaSlide({ slide, onUpdate, graphic, onRegenerateGraphic, onUplo
           onBlur={e => onUpdate?.({ ...slide, subtext: e.currentTarget.textContent || slide.subtext })}
           style={{
             fontSize: 'clamp(13px, 1.5vw, 18px)', fontWeight: 300,
-            color: '#A3A3A3', lineHeight: 1.65, marginBottom: '36px', outline: 'none',
+            color: 'var(--color-text-muted, #A3A3A3)', lineHeight: 1.65, marginBottom: '36px', outline: 'none',
           }}
         >{slide.subtext}</p>
 

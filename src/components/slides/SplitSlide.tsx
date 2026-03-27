@@ -32,7 +32,7 @@ export function SplitSlide({ slide, onUpdate, graphic, onRegenerateGraphic, onUp
           onBlur={e => onUpdate?.({ ...slide, title: e.currentTarget.textContent || slide.title })}
           style={{
             fontSize: 'clamp(22px, 3vw, 40px)', fontWeight: 700,
-            letterSpacing: '-0.025em', color: '#F5F5F5', marginBottom: '28px', outline: 'none',
+            letterSpacing: '-0.025em', color: 'var(--color-text, #F5F5F5)', marginBottom: '28px', outline: 'none',
           }}
         >{slide.title}</h2>
 
@@ -58,7 +58,7 @@ export function SplitSlide({ slide, onUpdate, graphic, onRegenerateGraphic, onUp
               suppressContentEditableWarning
               className={editable ? 'editable' : ''}
               onBlur={e => onUpdate?.({ ...slide, left: e.currentTarget.textContent || slide.left })}
-              style={{ fontSize: '13px', color: '#D1D5DB', lineHeight: 1.7, outline: 'none' }}
+              style={{ fontSize: '13px', color: 'var(--color-text-body, #D1D5DB)', lineHeight: 1.7, outline: 'none' }}
             >{slide.left}</p>
           </div>
 
@@ -83,7 +83,7 @@ export function SplitSlide({ slide, onUpdate, graphic, onRegenerateGraphic, onUp
               suppressContentEditableWarning
               className={editable ? 'editable' : ''}
               onBlur={e => onUpdate?.({ ...slide, right: e.currentTarget.textContent || slide.right })}
-              style={{ fontSize: '13px', color: '#D1D5DB', lineHeight: 1.7, outline: 'none' }}
+              style={{ fontSize: '13px', color: 'var(--color-text-body, #D1D5DB)', lineHeight: 1.7, outline: 'none' }}
             >{slide.right}</p>
           </div>
         </div>

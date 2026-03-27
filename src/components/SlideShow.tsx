@@ -4,6 +4,7 @@ import { SlideRenderer } from './SlideRenderer'
 import { Logo } from './Logo'
 import { exportPDF, exportPNG, exportPPTX } from '../lib/export'
 import { calcCost, formatCost } from '../lib/claude'
+import { textColors } from '../lib/colors'
 
 interface SlideShowProps {
   presentation: Presentation
@@ -80,10 +81,15 @@ export function SlideShow({
   const cost = calcCost(totalUsage)
   const hasUsage = totalUsage.input > 0 || totalUsage.output > 0
 
+  const tc = textColors(colors.bg)
   const cssVars = {
     '--color-primary': colors.primary,
     '--color-accent': colors.accent,
     '--color-bg': colors.bg,
+    '--color-text': tc.text,
+    '--color-text-muted': tc.textMuted,
+    '--color-text-body': tc.textBody,
+    '--color-text-dim': tc.textDim,
   } as React.CSSProperties
 
   const navBtnStyle = (active: boolean) => ({
