@@ -66,7 +66,7 @@ export function HeroSlide({ slide, onUpdate, graphic, onRegenerateGraphic, onUpl
           onBlur={e => onUpdate?.({ ...slide, title: e.currentTarget.textContent || slide.title })}
           style={{
             fontSize: 'clamp(32px, 5vw, 60px)', fontWeight: 700,
-            letterSpacing: '-0.03em', lineHeight: 1.05, color: '#F5F5F5', outline: 'none',
+            letterSpacing: '-0.03em', lineHeight: 1.05, color: 'var(--color-text, #F5F5F5)', outline: 'none',
           }}
         >{slide.title}</h1>
 
@@ -75,7 +75,7 @@ export function HeroSlide({ slide, onUpdate, graphic, onRegenerateGraphic, onUpl
           suppressContentEditableWarning
           className={editable ? 'editable' : ''}
           onBlur={e => onUpdate?.({ ...slide, subtitle: e.currentTarget.textContent || slide.subtitle })}
-          style={{ fontSize: 'clamp(14px, 1.8vw, 20px)', fontWeight: 300, color: '#A3A3A3', lineHeight: 1.6, outline: 'none' }}
+          style={{ fontSize: 'clamp(14px, 1.8vw, 20px)', fontWeight: 300, color: 'var(--color-text-muted, #A3A3A3)', lineHeight: 1.6, outline: 'none' }}
         >{slide.subtitle}</p>
 
         <div style={{

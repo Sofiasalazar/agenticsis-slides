@@ -36,8 +36,8 @@ function isFiniteAnimation(a: Animation): boolean {
 // Uses a 7s minimum floor so animations that start late are still captured,
 // then waits for detected animations to finish (up to 12s hard cap).
 async function waitForAnimations(el: HTMLElement): Promise<void> {
-  const MIN_WAIT = 7000   // floor — covers slow-starting or undetected animations
-  const MAX_WAIT = 12000  // hard cap
+  const MIN_WAIT = 8000   // floor — covers slow-starting or undetected animations
+  const MAX_WAIT = 15000  // hard cap
 
   // Let the HTML inject and animations start before we try to detect them
   await new Promise(r => setTimeout(r, 600))

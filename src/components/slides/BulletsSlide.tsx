@@ -54,7 +54,7 @@ export function BulletsSlide({ slide, onUpdate, graphic, onRegenerateGraphic, on
           onBlur={e => onUpdate?.({ ...slide, title: e.currentTarget.textContent || slide.title })}
           style={{
             fontSize: 'clamp(24px, 3.5vw, 44px)', fontWeight: 700,
-            letterSpacing: '-0.025em', color: '#F5F5F5', marginBottom: '8px', outline: 'none',
+            letterSpacing: '-0.025em', color: 'var(--color-text, #F5F5F5)', marginBottom: '8px', outline: 'none',
           }}
         >{slide.title}</h2>
 
@@ -64,7 +64,7 @@ export function BulletsSlide({ slide, onUpdate, graphic, onRegenerateGraphic, on
             suppressContentEditableWarning
             className={editable ? 'editable' : ''}
             onBlur={e => onUpdate?.({ ...slide, description: e.currentTarget.textContent || '' })}
-            style={{ fontSize: '14px', color: '#A3A3A3', marginBottom: '24px', lineHeight: 1.6, outline: 'none' }}
+            style={{ fontSize: '14px', color: 'var(--color-text-muted, #A3A3A3)', marginBottom: '24px', lineHeight: 1.6, outline: 'none' }}
           >{slide.description}</p>
         )}
         {!slide.description && <div style={{ marginBottom: '24px' }} />}
@@ -85,7 +85,7 @@ export function BulletsSlide({ slide, onUpdate, graphic, onRegenerateGraphic, on
                 suppressContentEditableWarning
                 className={editable ? 'editable' : ''}
                 onBlur={e => updateBullet(i, e.currentTarget.textContent || bullet)}
-                style={{ fontSize: '15px', color: '#D1D5DB', lineHeight: 1.6, outline: 'none', flex: 1 }}
+                style={{ fontSize: '15px', color: 'var(--color-text-body, #D1D5DB)', lineHeight: 1.6, outline: 'none', flex: 1 }}
               >{bullet}</span>
               {editable && (
                 <button

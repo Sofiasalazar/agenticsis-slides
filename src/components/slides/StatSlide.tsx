@@ -45,7 +45,7 @@ export function StatSlide({ slide, onUpdate, graphic, onRegenerateGraphic, onUpl
           onBlur={e => onUpdate?.({ ...slide, title: e.currentTarget.textContent || slide.title })}
           style={{
             fontSize: 'clamp(22px, 3vw, 40px)', fontWeight: 700,
-            letterSpacing: '-0.025em', color: '#F5F5F5', marginBottom: '28px', outline: 'none',
+            letterSpacing: '-0.025em', color: 'var(--color-text, #F5F5F5)', marginBottom: '28px', outline: 'none',
           }}
         >{slide.title}</h2>
 
@@ -72,7 +72,7 @@ export function StatSlide({ slide, onUpdate, graphic, onRegenerateGraphic, onUpl
                 suppressContentEditableWarning
                 className={editable ? 'editable' : ''}
                 onBlur={e => updateStat(i, 'label', e.currentTarget.textContent || stat.label)}
-                style={{ fontSize: '13px', fontWeight: 600, color: '#F5F5F5', marginBottom: '2px', display: 'block', outline: 'none' }}
+                style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-text, #F5F5F5)', marginBottom: '2px', display: 'block', outline: 'none' }}
               >{stat.label}</span>
               {stat.note && (
                 <span
@@ -80,7 +80,7 @@ export function StatSlide({ slide, onUpdate, graphic, onRegenerateGraphic, onUpl
                   suppressContentEditableWarning
                   className={editable ? 'editable' : ''}
                   onBlur={e => updateStat(i, 'note', e.currentTarget.textContent || '')}
-                  style={{ fontSize: '11px', color: '#525252', display: 'block', outline: 'none' }}
+                  style={{ fontSize: '11px', color: 'var(--color-text-dim, #525252)', display: 'block', outline: 'none' }}
                 >{stat.note}</span>
               )}
             </div>
