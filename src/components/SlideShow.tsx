@@ -53,12 +53,16 @@ export function SlideShow({
     setExportMenu(false)
     setExporting(true)
     try {
-      // Brief pause for any lazy renders, then export.ts waits for animations per-element
-      await new Promise(r => setTimeout(r, 500))
-      const elements = exportRefs.current.filter(Boolean) as HTMLElement[]
-      if (format === 'pdf') await exportPDF(elements, presentation.title, colors.bg)
-      if (format === 'png') await exportPNG(elements, presentation.title, colors.bg)
-      if (format === 'pptx') await exportPPTX(elements, presentation.title, colors.bg)
+      if (format === 'pptx') {
+        // Native PPTX -- no screenshots needed, builds editable slides
+        await exportPPTX(presentation, graphics, colors)
+      } else {
+        // PDF and PNG still use html2canvas screenshots
+        await new Promise(r => setTimeout(r, 500))
+        const elements = exportRefs.current.filter(Boolean) as HTMLElement[]
+        if (format === 'pdf') await exportPDF(elements, presentation.title, colors.bg)
+        if (format === 'png') await exportPNG(elements, presentation.title, colors.bg)
+      }
     } finally {
       setExporting(false)
     }
