@@ -199,7 +199,7 @@ function buildHero(
   if (slide.badge) {
     pptxSlide.addText(slide.badge.toUpperCase(), {
       x: PAD, y: 1.2, w: CONTENT_W - PAD * 2, h: 0.35,
-      fontSize: 10, fontFace: 'Arial', bold: true, letterSpacing: 1.5,
+      fontSize: 10, fontFace: 'Arial', bold: true, charSpacing: 1.5,
       color: hex(colors.primary),
     })
   }
@@ -229,7 +229,7 @@ function buildBullets(
   // Section label
   pptxSlide.addText('KEY POINTS', {
     x: PAD, y: 0.7, w: CONTENT_W - PAD * 2, h: 0.3,
-    fontSize: 10, fontFace: 'Arial', bold: true, letterSpacing: 1.2,
+    fontSize: 10, fontFace: 'Arial', bold: true, charSpacing: 1.2,
     color: hex(colors.primary),
   })
   // Title
@@ -284,7 +284,7 @@ function buildSplit(
   if (slide.leftLabel) {
     pptxSlide.addText(slide.leftLabel.toUpperCase(), {
       x: PAD + 0.2, y: 2.3, w: colW - 0.4, h: 0.3,
-      fontSize: 9, fontFace: 'Arial', bold: true, letterSpacing: 1.2,
+      fontSize: 9, fontFace: 'Arial', bold: true, charSpacing: 1.2,
       color: hex(colors.primary),
     })
   }
@@ -303,7 +303,7 @@ function buildSplit(
   if (slide.rightLabel) {
     pptxSlide.addText(slide.rightLabel.toUpperCase(), {
       x: rightX + 0.2, y: 2.3, w: colW - 0.4, h: 0.3,
-      fontSize: 9, fontFace: 'Arial', bold: true, letterSpacing: 1.2,
+      fontSize: 9, fontFace: 'Arial', bold: true, charSpacing: 1.2,
       color: hex(colors.accent),
     })
   }
@@ -352,7 +352,7 @@ function buildStat(
   // Section label
   pptxSlide.addText('BY THE NUMBERS', {
     x: PAD, y: 0.7, w: CONTENT_W - PAD * 2, h: 0.3,
-    fontSize: 10, fontFace: 'Arial', bold: true, letterSpacing: 1.2,
+    fontSize: 10, fontFace: 'Arial', bold: true, charSpacing: 1.2,
     color: hex(colors.accent),
   })
   // Title
